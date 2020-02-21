@@ -1,6 +1,5 @@
 <template>
     <div>
-        <h1>this is views--frontpage</h1>
         <clientone></clientone>
         <computer></computer>
         <clienttwo></clienttwo>

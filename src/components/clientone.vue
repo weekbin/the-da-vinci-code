@@ -1,51 +1,67 @@
 <template>
     <div>
-        <h3>this is components--client1</h3>
+        <h3 style="margin-left:10px;">机器人的卡牌</h3>
         <div class="md-layout md-alignment-center-left">
-            <div class="md-xlarge-size-6 md-large-size-7 md-medium-size-12" v-for="i in cards" :key="i.id">
-                <md-card md-with-hover :style="`background-color:${i.bcolor}`" class="md-elevation-15">
+            <div v-for="i in clientone" :key="i.id" @click="openDialog(i)">
+                <md-card md-with-hover :style="`background:url(${i.background_image}) no-repeat;background-size:cover;`"
+                 class="md-elevation-15 animated slideInRight">
                     <div style="display:flex;height:100%">
-                        <div class="number" :style="`color:${i.color}`">{{i.number}}</div>
+                        <div class="number">
+                            <span v-if="i.show">{{i.number}}</span>
+                        </div>
                     </div>
                 </md-card>
             </div>
         </div>
+        <md-dialog-prompt :md-active.sync="active" md-title="这张卡牌是几呢？" v-model="value"
+         md-input-placeholder="请输入0-11之间的数字" md-confirm-text="确定" @md-confirm="onConfirm"/>
+            <md-dialog-alert
+           :md-active.sync="first"
+            md-title="你猜对了"
+            md-content="居居：\'这张卡片的数字和你猜的一样！\'" />
+            <md-dialog-alert
+           :md-active.sync="second"
+            md-title="你猜错了"
+            md-content="居居：'哈哈哈哈，你猜错了！'" />
+
     </div> 
-</template>
+</template> 
 
 <script>
+import {mapState} from 'vuex'
 export default {
     name:'clientone',
     data(){
         return{
-            cards:[
-                {id:0, number:0, bcolor:'black', color:'white',show: false},
-                {id:1, number:1, bcolor:'black', color:'white',show: false},
-                {id:2, number:2, bcolor:'black', color:'white',show: false},
-                {id:3, number:3, bcolor:'black', color:'white',show: false},
-                {id:4, number:4, bcolor:'black', color:'white',show: false},
-                {id:5, number:5, bcolor:'black', color:'white',show: false},
-                {id:6, number:6, bcolor:'black', color:'white',show: false},
-                {id:7, number:7, bcolor:'black', color:'white',show: false},
-                {id:8, number:8, bcolor:'black', color:'white',show: false},
-                {id:9, number:9, bcolor:'black', color:'white',show: false},
-                {id:10, number:10, bcolor:'black', color:'white',show: false},
-                {id:11, number:11, bcolor:'black', color:'white',show: false},
-                {id:12, number:0, bcolor:'white', color:'black',show: false},
-                {id:13, number:1, bcolor:'white', color:'black',show: false},
-                {id:14, number:2, bcolor:'white', color:'blacke',show: false},
-                {id:15, number:3, bcolor:'white', color:'black',show: false},
-                {id:16, number:4, bcolor:'white', color:'black',show: false},
-                {id:17, number:5, bcolor:'white', color:'black',show: false},
-                {id:18, number:6, bcolor:'white', color:'black',show: false},
-                {id:19, number:7, bcolor:'white', color:'black',show: false},
-                {id:20, number:8, bcolor:'white', color:'black',show: false},
-                {id:21, number:9, bcolor:'white', color:'black',show: false},
-                {id:22, number:10, bcolor:'white', color:'black',show: false},
-                {id:23, number:11, bcolor:'white', color:'black',show: false}
-            ]
+            active:false,
+            first:false,
+            second:false,
+            value: null,
+            item:null
         }
-    }
+    },
+    methods:{
+        openDialog(item){
+            this.active = true;
+            this.item = item;
+            // if(item)
+        },
+        onConfirm(){
+            if(this.item.number == this.value){
+                this.first = true;
+                this.$store.commit('showCard',this.item)
+            }else{
+                this.second = true;
+            }
+        }
+    },
+    computed: mapState({
+        clientone(){
+            return this.$store.state.clientone;
+        },
+        
+        
+    })
 
 }
 </script>
@@ -57,6 +73,7 @@ export default {
     margin: 10px;
     display: inline-block;
     vertical-align: top;
+    
 }
 .number{
     font-size: 100px;
