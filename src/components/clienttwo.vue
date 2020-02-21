@@ -19,6 +19,9 @@
 import {mapState} from 'vuex'
 export default {
     name:'clienttwo',
+    methods:{
+        
+    },
     computed: mapState({
         clienttwo(){
             return this.$store.state.clienttwo

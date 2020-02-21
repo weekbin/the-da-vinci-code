@@ -34,7 +34,7 @@ export default new Vuex.Store({
             {id:24, number:'-', background_image:'https://www.weekbin.life/static/image/pig2.jpg', color:'black', show: false},
         ],
         clientone:[
-            
+
         ],
         clienttwo:[
             
@@ -48,15 +48,6 @@ export default new Vuex.Store({
                 return first_value - second_value;
             })
             state.input_list = sort_list;
-        },
-        specialCard(state,client){
-            if(client == 'clientone'){
-                state.clientone[state.clientone.length-1]['id'] = state.clientone[state.clientone.length-2]['id'] + 0.5
-            }else if(client == 'clienttwo'){
-                state.clienttwo[state.clienttwo.length-1]['id'] = state.clienttwo[state.clienttwo.length-2]['id'] + 0.5
-            }else{
-                throw new Error('wrong parma, please input chart \'clientone\' or \'clienttwo\'')
-            }
         },
         showCard(state,item){
             let index = item.id
@@ -90,10 +81,15 @@ export default new Vuex.Store({
             }
             state.cards_pond = cardsInPond;
         },
-        getCard(state){
+        getCard(state,client){
             if(state.cards_pond.length>0){
-                state.clientone.push(state.cards_pond.pop(Math.floor(Math.random()*state.cards_pond.length)));
-                state.clienttwo.push(state.cards_pond.pop(Math.floor(Math.random()*state.cards_pond.length)));
+                if(client == 'clientone'){
+                    state.clientone.push(state.cards_pond.pop(Math.floor(Math.random()*state.cards_pond.length)));
+                }else if(client == 'clienttwo'){
+                    state.clienttwo.push(state.cards_pond.pop(Math.floor(Math.random()*state.cards_pond.length)));
+                }else{
+                    throw new Error('wrong parma, please input chart \'clientone\' or \'clienttwo\'')
+                }         
             }else{
                 window.alert('you can\'t get card')
             }

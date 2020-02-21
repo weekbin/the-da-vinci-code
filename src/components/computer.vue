@@ -1,5 +1,33 @@
 <template>
     <div style="height:250px;" class="md-layout md-alignment-top-space-around">
+        <md-dialog :md-active.sync="special24">
+            <md-dialog-title>居居有了新发现</md-dialog-title>
+            <md-dialog-content>居居：'你有圣诞老人百搭牌，请选择一张牌，百搭将放于这张牌之后！</md-dialog-content>
+            <md-dialog-content>
+                <div v-for="i in clienttwo" :key="i.id" style="float:left" v-show="i.number!=='-'">
+                    <md-card md-with-hover id="smallcard" :style="`background:url(${i.background_image}) no-repeat;background-size:cover;`"
+                    >
+                        <div style="display:flex;height:100%;" @click="moveTo(i.id,24)">
+                            <div class="number">{{i.number}}</div>
+                        </div>
+                    </md-card>
+                </div>
+            </md-dialog-content>
+        </md-dialog>
+        <md-dialog :md-active.sync="special25">
+            <md-dialog-title>居居有了新发现</md-dialog-title>
+            <md-dialog-content>居居：'你有斧头帮老大百搭牌，请选择一张牌，百搭将放于这张牌之后！</md-dialog-content>
+            <md-dialog-content>
+                <div v-for="i in clienttwo" :key="i.id" style="float:left" v-show="i.number!=='-'">
+                    <md-card md-with-hover id="smallcard" :style="`background:url(${i.background_image}) no-repeat;background-size:cover;`"
+                    >
+                        <div style="display:flex;height:100%;" @click="moveTo(i.id,25)">
+                            <div class="number">{{i.number}}</div>
+                        </div>
+                    </md-card>
+                </div>
+            </md-dialog-content>
+        </md-dialog>
         <div style="position:relative;" class="md-layout-item">
             <div v-for="(item,index) in cards_pond" :key="index" :style="`position:absolute;left:${index*0.8}px;top:${index*0.25}px`">
                 <div>
@@ -19,7 +47,7 @@
         <div class="md-layout-item desk">
             <div style="display:flex;height:100%;width:100%;">
                 <div style="margin:auto">
-                    <h1>{{this.gameInfo}}</h1>
+                    <h2>{{this.gameInfo}}</h2>
                 </div>
             </div>
             
@@ -35,46 +63,100 @@ export default {
     data(){
         return{
             number:24,
-            gameInfo:'请点击拿牌开始游戏'
+            gameInfo:'请点击拿牌开始游戏',
+            special24:false,
+            special25:false,
             
         }
     },
     methods:{
-        getCard(){
-            this.$store.commit('getCard');
-            if(this.clientone.length>1 ||this.clienttwo.length>1){
-                if(this.clienttwo[this.clienttwo.length-1]['id'] == 24 || this.clienttwo[this.clienttwo.length-1]['id'] == 25){
-                    this.$store.commit('specialCard','clienttwo') 
+        getCard(client,seconds){
+            setTimeout(()=>{
+                this.$store.commit('getCard',client);
+            },seconds) 
+        },
+        moveTo(inputId,specialId){
+            if(specialId == 24){
+                for(let i in this.clienttwo){
+                    if(this.clienttwo[i].id == 24){
+                        this.clienttwo[i].id = inputId + 0.5
+                        this.special24 = false
+                        this.$store.commit('setClienttwo',this.clienttwo)
+                    }
                 }
-                 setTimeout(()=>{
-                    this.$store.commit('sortCards',this.clienttwo);
-                    this.$store.commit('sortCards',this.clientone);
-                },500)
+            }else if(specialId == 25){
+                for(let i in this.clienttwo){
+                    if(this.clienttwo[i].id == 25){
+                        this.clienttwo[i].id = inputId + 0.5
+                        this.special25 = false
+                        this.$store.commit('setClienttwo',this.clienttwo)
+                    }
+                }
+            }else{
+                throw new Error('wrong id')
             }
+            this.$store.commit('sortCards',this.clienttwo);
         },
         washCards(){
             this.$store.commit('washCardsInPond');
         },
         init(){
-            if(this.clientone.length == 0){
-                this.gameInfo = '请等待居居发牌，居居会帮你将卡牌排序'
+            if(this.clienttwo.length == 0){
+                this.gameInfo = '请等待居居发牌，发牌结束后居居会帮你将卡牌排序'
+                this.getCard('clienttwo',500)
+                this.getCard('clientone',1000)
+                this.getCard('clienttwo',1500)
+                this.getCard('clientone',2000)
+                this.getCard('clienttwo',2500)
+                this.getCard('clientone',3000)
+                this.getCard('clienttwo',3500)
+                this.getCard('clientone',4000)
                 setTimeout(()=>{
-                    this.getCard()
-                },1500)
-                setTimeout(()=>{
-                    this.getCard()
-                },2000)
-                setTimeout(()=>{
-                    this.getCard()
-                },2500)
-                setTimeout(()=>{
-                    this.getCard()
-                },3000)
-                setTimeout(()=>{
-                    this.gameInfo = '你可以选择继续拿牌或者猜测机器人的卡牌'
-                },3500)
+                    for(let i of this.clienttwo){
+                        if(i.id == 24){
+                            this.special24 = true
+                        }else if(i.id == 25){
+                            this.special25 = true
+                        }
+                    }
+                    for(let i in this.clientone){
+                        if(this.clientone[i].id == 24){
+                            this.clientone[i].id = this.clientone[Math.floor(Math.random()*this.clientone.length)].id + 0.5
+                        }else if(this.clientone[i].id == 25){
+                            this.clientone[i].id = this.clientone[Math.floor(Math.random()*this.clientone.length)].id + 0.5
+                        }
+                    }
+                    this.$store.commit('sortCards',this.clienttwo);
+                    this.$store.commit('sortCards',this.clientone);
+                    this.gameInfo = '请继续游戏，你可以选择拿牌或猜牌'
+                },4500)
             }else{
-                this.getCard()
+                this.getCard('clienttwo',0)
+                setTimeout(() => {
+                    if(this.clienttwo[this.clienttwo.length-1].id == 24){
+                        this.special24 = true
+                    }else if(this.clienttwo[this.clienttwo.length-1].id == 25){
+                        this.special25 = true
+                    }else{
+                        this.$store.commit('sortCards',this.clienttwo);
+                    }
+                    if(this.clientone[this.clientone.length-1].id == 24){
+                        this.clientone[this.clientone.length-1].id = this.clientone[Math.floor(Math.random()*this.clientone.length)].id + 0.5
+                    }else if(this.clientone[this.clientone.length-1].id == 25){
+                        this.clientone[this.clientone.length-1].id = this.clientone[Math.floor(Math.random()*this.clientone.length)].id + 0.5
+                    }else{
+                        this.$store.commit('sortCards',this.clienttwo);
+                    }
+                }, 500);
+                setTimeout(() => {
+                    this.gameInfo = '机器人拿拿开始思考.'
+                    setTimeout(() => {
+                        this.gameInfo = '机器人拿拿开始思考..'
+                    }, 1000);
+                    setTimeout(() => {
+                        this.gameInfo = '机器人拿拿开始思考...'
+                    }, 2000);
+                }, 1000);
             }
         }
     },
@@ -118,10 +200,14 @@ export default {
     vertical-align: top;
 }
 .number{
-    font-size: 100px;
+    font-size: 50px;
     margin: auto;
 }
 .desk{
     height: 250px;
+}
+#smallcard{
+    width: 90px;
+    height: 120px;
 }
 </style>
