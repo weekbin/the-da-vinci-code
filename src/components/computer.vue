@@ -1,10 +1,10 @@
 <template>
-    <div style="height:250px;">
-        <div style="position:relative;">
+    <div style="height:250px;" class="md-layout md-alignment-top-space-around">
+        <div style="position:relative;" class="md-layout-item">
             <div v-for="(item,index) in cards_pond" :key="index" :style="`position:absolute;left:${index*0.8}px;top:${index*0.25}px`">
                 <div>
                     <md-card :style="`background:url(${item.background_image}) no-repeat;background-size:150px 200px;`"
-                    class="animated slideInLeft">{{item.id}}</md-card>
+                    class="animated slideInLeft"></md-card>
                 </div>
             </div>
             <div style="position:absolute;left:210px;top:130px;">
@@ -15,8 +15,16 @@
                 <md-button class="md-raised" :md-ripple="false" v-on:click="init">拿牌</md-button>
                 <md-button class="md-raised" :md-ripple="false" v-on:click="washCards">洗牌</md-button>
             </div>
+        </div>
+        <div class="md-layout-item desk">
+            <div style="display:flex;height:100%;width:100%;">
+                <div style="margin:auto">
+                    <h1>{{this.gameInfo}}</h1>
+                </div>
+            </div>
             
         </div>
+        <div class="md-layout-item"></div>
     </div>
 </template>
 
@@ -27,6 +35,7 @@ export default {
     data(){
         return{
             number:24,
+            gameInfo:'请点击拿牌开始游戏'
             
         }
     },
@@ -48,11 +57,22 @@ export default {
         },
         init(){
             if(this.clientone.length == 0){
-                setTimeout(this.getCard,500)
-                setTimeout(this.getCard,1000)
-                setTimeout(this.getCard,1500)
-                setTimeout(this.getCard,2000)
-
+                this.gameInfo = '请等待居居发牌，居居会帮你将卡牌排序'
+                setTimeout(()=>{
+                    this.getCard()
+                },1500)
+                setTimeout(()=>{
+                    this.getCard()
+                },2000)
+                setTimeout(()=>{
+                    this.getCard()
+                },2500)
+                setTimeout(()=>{
+                    this.getCard()
+                },3000)
+                setTimeout(()=>{
+                    this.gameInfo = '你可以选择继续拿牌或者猜测机器人的卡牌'
+                },3500)
             }else{
                 this.getCard()
             }
@@ -101,5 +121,7 @@ export default {
     font-size: 100px;
     margin: auto;
 }
-
+.desk{
+    height: 250px;
+}
 </style>
