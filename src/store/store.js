@@ -49,14 +49,24 @@ export default new Vuex.Store({
             })
             state.input_list = sort_list;
         },
-        showCard(state,item){
-            let index = item.id
-            for(let i of state.clientone){
-                window.console.log(i.id,item.id)
-                if(i.id == index){
-                    i.show = true
+        showCard(state,stark){
+            let index = stark.item.id
+            if(stark.client == 'clientone'){
+                for(let i of state.clientone){
+                    if(i.id == index){
+                        i.show = true
+                    }
                 }
+            }else if(stark.client == 'clienttwo'){
+                for(let i of state.clienttwo){
+                    if(i.id == index){
+                        i.show = true
+                    }
+                }
+            }else{
+                throw new Error('wrong parma, please input chart \'clientone\' or \'clienttwo\'')
             }
+            
         },
 		setClientone(state,clientone_cards){
             state.clientone = clientone_cards;

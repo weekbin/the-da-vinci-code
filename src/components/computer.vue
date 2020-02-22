@@ -47,12 +47,22 @@
         <div class="md-layout-item desk">
             <div style="display:flex;height:100%;width:100%;">
                 <div style="margin:auto">
+                    
                     <h2>{{this.gameInfo}}</h2>
+                    
                 </div>
             </div>
             
         </div>
         <div class="md-layout-item"></div>
+        <md-dialog :md-active.sync="secret">
+            <md-dialog-title>居居塞给你一张小纸条</md-dialog-title>
+            <md-dialog-content>居居：'你给我5块钱零花钱，我告诉你一个秘密！</md-dialog-content>
+            <md-dialog-actions>
+                <md-button class="md-primary" @click="secret = false">算了吧</md-button>
+                <md-button class="md-primary" @click="getSecret()">欣然接受</md-button>
+            </md-dialog-actions>
+        </md-dialog>
     </div>
 </template>
 
@@ -66,10 +76,41 @@ export default {
             gameInfo:'请点击拿牌开始游戏',
             special24:false,
             special25:false,
+            win:false,
+            specialItem:undefined,
+            secret:false
             
         }
     },
     methods:{
+        getSecret(){
+            this.secret = false
+            let random = Math.random()
+            window.console.log(random)
+
+            if(random <=0.2){
+                this.gameInfo = '粑粑特别喜欢吃超级鸡车的炸鱿鱼须'
+            }else if(random>0.7){
+                let sum = 0;
+                for(let i of this.clientone){
+                    if(i.number == '-'){
+                        sum += 1
+                    }
+                }
+                this.gameInfo = '机器人有' + sum +'张特殊牌'
+            }else if(random>0.2 && random<=0.4){
+                this.gameInfo = '犇犇喜欢把钱藏在粑粑的钱包里'
+            }else{
+                for(let i of this.clientone){
+                    if(!i.show){
+                        this.gameInfo = '机器人第一张没亮出的牌是'+ i.number
+                        break
+                    }else{
+                        continue
+                    }
+                }
+            }
+        },
         getCard(client,seconds){
             setTimeout(()=>{
                 this.$store.commit('getCard',client);
@@ -102,7 +143,7 @@ export default {
         },
         init(){
             if(this.clienttwo.length == 0){
-                this.gameInfo = '请等待居居发牌，发牌结束后居居会帮你将卡牌排序'
+                this.gameInfo = '等待居居发牌，居居会帮你将卡牌排序'
                 this.getCard('clienttwo',500)
                 this.getCard('clientone',1000)
                 this.getCard('clienttwo',1500)
@@ -122,8 +163,10 @@ export default {
                     for(let i in this.clientone){
                         if(this.clientone[i].id == 24){
                             this.clientone[i].id = this.clientone[Math.floor(Math.random()*this.clientone.length)].id + 0.5
+                            this.$store.commit('setClientone',this.clientone)
                         }else if(this.clientone[i].id == 25){
                             this.clientone[i].id = this.clientone[Math.floor(Math.random()*this.clientone.length)].id + 0.5
+                            this.$store.commit('setClientone',this.clientone)
                         }
                     }
                     this.$store.commit('sortCards',this.clienttwo);
@@ -140,22 +183,99 @@ export default {
                     }else{
                         this.$store.commit('sortCards',this.clienttwo);
                     }
-                    if(this.clientone[this.clientone.length-1].id == 24){
-                        this.clientone[this.clientone.length-1].id = this.clientone[Math.floor(Math.random()*this.clientone.length)].id + 0.5
-                    }else if(this.clientone[this.clientone.length-1].id == 25){
-                        this.clientone[this.clientone.length-1].id = this.clientone[Math.floor(Math.random()*this.clientone.length)].id + 0.5
-                    }else{
-                        this.$store.commit('sortCards',this.clienttwo);
-                    }
                 }, 500);
                 setTimeout(() => {
-                    this.gameInfo = '机器人拿拿开始思考.'
+                    this.gameInfo = '机器人开始思考.'
                     setTimeout(() => {
-                        this.gameInfo = '机器人拿拿开始思考..'
+                        this.gameInfo = '机器人开始思考..'
+                    }, 500);
+                    setTimeout(() => {
+                        this.gameInfo = '机器人开始思考...'
+                        if(this.clientone.length<9){
+                            this.getCard('clientone',0)
+                            setTimeout(() => {
+                                if(this.clientone[this.clientone.length-1].id == 24){
+                                    this.clientone[this.clientone.length-1].id = this.clientone[Math.floor(Math.random()*this.clientone.length)].id + 0.5
+                                    this.$store.commit('setClientone',this.clientone)                    
+                                }else if(this.clientone[this.clientone.length-1].id == 25){
+                                    this.clientone[this.clientone.length-1].id = this.clientone[Math.floor(Math.random()*this.clientone.length)].id + 0.5
+                                    this.$store.commit('setClientone',this.clientone)
+                                }else{
+                                    this.$store.commit('sortCards',this.clientone);
+                                }
+                                this.gameInfo = '请继续游戏，你可以选择拿牌或猜牌'
+                            }, 500);
+                        }else if(this.cards_pond.length == 0){
+                            let item;
+                            for(let i of this.clienttwo){
+                                if(!i.show){
+                                    if(i.number == '-' && this.specialItem !== i.id){
+                                        this.gameInfo = '机器人猜错了，请继续游戏，你可以选择拿牌或猜牌'
+                                        for(let j of this.clientone){
+                                            if(!j.show){
+                                                this.$store.commit('showCard',{'item':j,'client':'clientone'})
+                                                break
+                                            }else{
+                                                continue
+                                            }
+                                            
+                                        }
+                                        this.specialItem = i.id
+                                        this.gameInfo = '机器人连续推牌，猜错了一张牌'
+                                        break
+                                    }else{
+                                        item = i
+                                        this.$store.commit('showCard',{'item':item,'client':'clienttwo'})
+                                        this.gameInfo = '机器人看透了你的卡牌'
+                                    }
+                                    
+                                }
+                            }
+                        }else{
+                            let item;
+                            for(let i of this.clienttwo){
+                                if(!i.show){
+                                    if(i.number == '-' && this.specialItem !== i.id){
+                                        this.gameInfo = '机器人猜错了，请继续游戏，你可以选择拿牌或猜牌'
+                                        for(let j of this.clientone){
+                                            if(!j.show){
+                                                this.$store.commit('showCard',{'item':j,'client':'clientone'})
+                                                break
+                                            }else{
+                                                continue
+                                            } 
+                                        }
+                                        this.specialItem = i.id
+                                        this.gameInfo = '机器人猜错了一张牌'
+                                        break
+                                    }else{
+                                        item = i
+                                        this.$store.commit('showCard',{'item':item,'client':'clienttwo'})
+                                        this.gameInfo = '机器人猜中了你的牌，请继续游戏，你可以选择拿牌或猜牌'
+                                        let random = Math.random()
+                                        if(random <=0.3){
+                                            this.gameInfo = '机器人连续推牌，猜错了一张牌'
+                                            for(let j of this.clientone){
+                                                if(!j.show){
+                                                    this.$store.commit('showCard',{'item':j,'client':'clientone'})
+                                                    break
+                                                }else{
+                                                    continue
+                                                } 
+                                            }
+                                            let random2 = Math.random()
+                                            if(random2 <=0.3){this.secret = !this.secret}
+                                            break
+                                        }else{
+                                            continue
+                                        }
+                                        
+                                    }
+                                    
+                                }
+                            }
+                        }
                     }, 1000);
-                    setTimeout(() => {
-                        this.gameInfo = '机器人拿拿开始思考...'
-                    }, 2000);
                 }, 1000);
             }
         }
@@ -182,7 +302,7 @@ export default {
                 }
             }
             return {'black':black,'white':white}
-        }
+        },
     }),
     created(){
         this.washCards()
